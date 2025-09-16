@@ -54,23 +54,30 @@ window.addEventListener('DOMContentLoaded', async function () {
         // sleep
         await new Promise(resolve => setTimeout(resolve, waitTime));
     }
-    if (! unsafeWindow.Vencord) {
+    if (!unsafeWindow.Vencord) {
         logger('error', "Vencord object is not found. Quitting...");
         return;
     }
-    
+
     const Vencord = unsafeWindow.Vencord;
     await Vencord.Webpack.onceReady;
-    const {FluxDispatcher} = Vencord.Webpack.Common;
+    const { FluxDispatcher } = Vencord.Webpack.Common;
 
     function handleUnclaimedQuests(data) {
         const source = data.source ? ` [${data.source}]` : "";
         logger('info', `Quest Fetch Success Dispatched: ${source}`)
-        const quests = data.quests
-        const unclaimedOrbQuests = Array.from(quests.values()).filter(quest => ! quest.userStatus && quest.config?.rewardsConfig?.rewards?.some(reward => reward?.orbQuantity > 0));
+        // Refetch from store
+        const quests = data.quests;
+        const unclaimedOrbQuests = Array.from(quests.values())
+            .filter(
+                quest => !quest.userStatus
+                    && (!quest.config.expiresAt || quest.config.expiresAt > Date.now())
+                    && quest.config?.rewardsConfig?.rewards?.some(reward => reward?.orbQuantity > 0)
+            );
+        console.log(unclaimedOrbQuests);
         // Get stored unclaimed from storage
         const storedUnclaimed = JSON.parse(localStorage.getItem('orbNotifUnclaimed')) || [];
-        const newUnclaimed = unclaimedOrbQuests.filter(quest => ! storedUnclaimed.includes(quest.id));
+        const newUnclaimed = unclaimedOrbQuests.filter(quest => !storedUnclaimed.includes(quest.id));
         // Set stored unclaimed to storage
         localStorage.setItem('orbNotifUnclaimed', JSON.stringify(unclaimedOrbQuests.map(quest => quest.id)));
         localStorage.setItem('orbNotifLastTime', Date.now());
@@ -84,8 +91,6 @@ window.addEventListener('DOMContentLoaded', async function () {
                 permanent: true,
             });
         } else {
-            console.log(unclaimedOrbQuests);
-            console.log(quests);
             logger('info', "No unclaimed orbs found.");
         }
 
