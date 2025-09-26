@@ -71,7 +71,7 @@ window.addEventListener('DOMContentLoaded', async function () {
         const unclaimedOrbQuests = Array.from(quests.values())
             .filter(
                 quest => !quest.userStatus
-                    && (!quest.config.expiresAt || quest.config.expiresAt > Date.now())
+                    && (!quest.config.expiresAt || Date.parse(quest.config.expiresAt) > Date.now())
                     && quest.config?.rewardsConfig?.rewards?.some(reward => reward?.orbQuantity > 0)
             );
         console.log(unclaimedOrbQuests);
