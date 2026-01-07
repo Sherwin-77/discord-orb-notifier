@@ -88,7 +88,7 @@ async function injectNotifier() {
             logger('info', "No unclaimed orbs found.");
         }
 
-        FluxDispatcher.unsubsribe('QUESTS_FETCH_CURRENT_QUESTS_SUCCESS', handleUnclaimedQuests);
+        FluxDispatcher.unsubscribe('QUESTS_FETCH_CURRENT_QUESTS_SUCCESS', handleUnclaimedQuests);
     }
 
     FluxDispatcher.subscribe('QUESTS_FETCH_CURRENT_QUESTS_SUCCESS', handleUnclaimedQuests)
