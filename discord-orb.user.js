@@ -25,15 +25,9 @@ function logger(level, ...args) {
     );
 }
 
-window.addEventListener('DOMContentLoaded', async function () {
-    logger('log', 'DOM Content Loaded');
-    function ff() {
-        document.querySelectorAll('[class^="videoCont_"] video').forEach(v => {
-            v.playbackRate = 16; // raises the playback speed to the highest of it's ability
-            v.volume = 0; // lowers the volume to avoid ear damage
-            v.play(); // attempts to play the video if it isn't already
-        });
-    }
+
+async function injectNotifier() {
+    logger('log', 'Inject Function loaded');
     const timestamp = localStorage.getItem('orbNotifLastTime') || 0;
     if (Date.now() - timestamp < 12 * 60 * 60 * 1000) {
         logger('log', `Checked last ${((Date.now() - timestamp) / 1000 / 60).toFixed(2)} minutes ago. Next check in ${((12 * 60 * 60 * 1000 - (Date.now() - timestamp)) / 1000 / 60).toFixed(2)} minutes.`);
@@ -98,4 +92,15 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
 
     FluxDispatcher.subscribe('QUESTS_FETCH_CURRENT_QUESTS_SUCCESS', handleUnclaimedQuests)
-}, false)
+}
+
+
+if (document.readyState !== 'loading') {
+    logger('log', 'Document is already loaded. Injecting...');
+    injectNotifier()
+} else {
+    window.addEventListener('DOMContentLoaded', async function () {
+        logger('log', 'Injecting through DOMContentLoaded');
+        await injectNotifier();
+    })
+}
